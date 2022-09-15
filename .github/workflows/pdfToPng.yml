@@ -1,0 +1,47 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push/pull request events but only when PDF file has changed
+  push:
+    paths:
+      - "Nathan_Cheung_Resume_No_Phone.pdf"
+  pull_request:
+    paths:
+      - "Nathan_Cheung_Resume_No_Phone.pdf"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a job called "convert-pdf-to-jpeg"
+  convert-pdf-to-jpeg:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Converts pushed PDF file to a JPEG file
+      - name: Convert PDF to JPEG
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install poppler-utils
+          pdftoppm Nathan_Cheung_Resume_No_Phone.pdf Nathan_Cheung_Resume_Image -jpeg -jpegopt quality=100 -singlefile -hide-annotations -r 100
+
+      # Pushes JPEG file to Github repo to be displayed in README.md
+      - name: Push JPEG to GitHub
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add Nathan_Cheung_Resume_Image.jpg
+          git commit -m "Converted PDF to JPEG file"
+          git push
